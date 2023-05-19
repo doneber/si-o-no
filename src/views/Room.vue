@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 
 const question = ref('')
+const answer = ref(false)
+const questionAsking = ref('')
 const showAskModal = ref(false)
+const showQuestionModal = ref(false)
 
 const clear = () => {
   question.value = ''
@@ -10,8 +13,17 @@ const clear = () => {
 
 const ask = () => {
   console.log(question.value)
+  // set questionAsking value to question.value and add a ? at the end in case it doesn't have one
+  questionAsking.value = (question.value.endsWith('¿') ? '' : '¿') + question.value + (question.value.endsWith('?') ? '' : '?')
+  showQuestionModal.value = true
   clear()
   closeAskDialog()
+}
+
+const sendAnswer = (value) => {
+  answer.value = value
+  console.log(answer.value)
+  closeQuestionDialog()
 }
 
 const openAskDialog = () => {
@@ -19,6 +31,9 @@ const openAskDialog = () => {
 }
 const closeAskDialog = () => {
   showAskModal.value = false
+}
+const closeQuestionDialog = () => {
+  showQuestionModal.value = false
 }
 
 </script>
@@ -42,6 +57,25 @@ const closeAskDialog = () => {
         <a @click="ask" href="#" role="button">
           Preguntar
         </a>
+      </footer>
+    </article>
+  </dialog>
+  <dialog :open="showQuestionModal">
+    <article style="width: 100%;">
+      <header>
+        <span>Pregunta</span>
+        <a @click="closeQuestionDialog" aria-label="Close" class="close"></a>
+      </header>
+      <p>{{ questionAsking }}</p>
+      <footer>
+        <div class="grid">
+          <button @click="sendAnswer(true)">
+            Si
+          </button>
+          <button @click="sendAnswer(false)">
+            No
+          </button>
+        </div>
       </footer>
     </article>
   </dialog>
