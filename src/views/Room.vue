@@ -1,22 +1,16 @@
 <script setup>
 import { ref } from 'vue'
 
-const question = ref('')
 const answer = ref(false)
-const questionAsking = ref('')
 const showAskModal = ref(false)
 const showQuestionModal = ref(false)
 
 const clear = () => {
-  question.value = ''
+  console.log('clear')
 }
 
 const ask = () => {
-  console.log(question.value)
-  // set questionAsking value to question.value and add a ? at the end in case it doesn't have one
-  questionAsking.value = (question.value.endsWith('¿') ? '' : '¿') + question.value + (question.value.endsWith('?') ? '' : '?')
   showQuestionModal.value = true
-  clear()
   closeAskDialog()
 }
 
@@ -88,10 +82,7 @@ const closeQuestionDialog = () => {
   <dialog :open="showAskModal">
     <article>
       <a @click="closeAskDialog" aria-label="Close" class="close"></a>
-      <label>
-        <span>Pregunta</span>
-        <textarea v-model="question" rows="3" cols="30" placeholder="Ej. ¿Esta de acuerdo?"></textarea>
-      </label>
+      <p>¿Preguntar <strong>SI</strong> o <strong>NO</strong> a los participantes?</p>
       <footer>
         <a @click="closeAskDialog" href="#" role="button" class="secondary">
           Cancelar
@@ -105,20 +96,17 @@ const closeQuestionDialog = () => {
   <dialog :open="showQuestionModal">
     <article style="width: 100%;">
       <header>
-        <span>Pregunta</span>
+        <span>El anfitrión esta preguntando <strong>SI</strong> o <strong>NO</strong></span>
         <a @click="closeQuestionDialog" aria-label="Close" class="close"></a>
       </header>
-      <p>{{ questionAsking }}</p>
-      <footer>
-        <div class="grid">
-          <button @click="sendAnswer(true)">
-            Si
-          </button>
-          <button @click="sendAnswer(false)">
-            No
-          </button>
-        </div>
-      </footer>
+      <div class="grid">
+        <button @click="sendAnswer(true)">
+          Si
+        </button>
+        <button @click="sendAnswer(false)">
+          No
+        </button>
+      </div>
     </article>
   </dialog>
 </template>
@@ -131,6 +119,7 @@ const closeQuestionDialog = () => {
   height: 100%;
   padding-top: 1rem;
 }
+
 .people {
   margin: 2rem auto 4rem;
 }
