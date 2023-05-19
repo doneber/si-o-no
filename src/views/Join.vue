@@ -12,12 +12,12 @@ const joinRoom = () => {
 
 </script>
 <template>
-  <div class="form">
+  <form @submit.prevent="joinRoom()" class="form">
     <label>Código de la sala
       <input v-model="codeRoom" type="text" placeholder="Ej. 1417510" required />
     </label>
     <div class="grid">
-      <button @click="joinRoom()" class="primary" type="submit">Unirse</button>
+      <button class="primary" type="submit">Unirse</button>
     </div>
-  </div>
+  </form>
 </template>

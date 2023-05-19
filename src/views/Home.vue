@@ -4,6 +4,15 @@ import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const username = ref('')
+const action = ref('')
+
+const goToRoom = () => {
+  if (action.value === 'createRoom') {
+    createRoom()
+  } else if (action.value === 'joinRoom') {
+    joinRoom()
+  }
+}
 
 const createRoom = () => {
   console.log('createRoom')
@@ -17,13 +26,13 @@ const joinRoom = () => {
 
 </script>
 <template>
-  <div class="form">
+  <form @submit.prevent="goToRoom" class="form">
     <label>Nombre de usuario
       <input v-model="username" type="text" placeholder="Ej. Juan" required />
     </label>
     <div class="grid">
-      <button @click="createRoom()" class="primary" type="submit">Crear sala</button>
-      <button @click="joinRoom()" class="secondary" type="submit">Unirse a una sala</button>
+      <button @click="action = 'createRoom'" class="primary" type="submit">Crear sala</button>
+      <button @click="action = 'joinRoom'" class="secondary" type="submit">Unirse a una sala</button>
     </div>
-  </div>
+  </form>
 </template>
