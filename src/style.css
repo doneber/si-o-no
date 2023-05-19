@@ -1,0 +1,15 @@
+:root {
+  --header-height: 60px;
+}
+
+#app {
+  height: 100vh;
+}
+
+main {
+  height: calc(100% - var(--header-height));
+}
+
+.main-header {
+  height: var(--header-height);
+}
