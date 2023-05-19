@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from './views/Home.vue'
 import Room from './views/Room.vue'
+import Join from './views/Join.vue'
 
 export default createRouter({
   history: createWebHistory(),
@@ -12,6 +13,10 @@ export default createRouter({
     {
       path: '/room',
       component: Room,
+    },
+    {
+      path: '/join',
+      component: Join,
     },
   ],
 })

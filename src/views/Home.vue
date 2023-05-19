@@ -12,6 +12,7 @@ const createRoom = () => {
 
 const joinRoom = () => {
   console.log('joinRoom')
+  router.push('/join')
 }
 
 </script>
