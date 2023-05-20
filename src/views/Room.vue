@@ -1,9 +1,37 @@
 <script setup>
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, onSnapshot, getDoc, } from "firebase/firestore";
+import config from './../../config.js';
 
 const answer = ref(false)
 const showAskModal = ref(false)
 const showQuestionModal = ref(false)
+
+const firebaseConfig = config.firebaseConfig
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// get param from url
+const { params } = useRoute()
+const codeRoom = ref(params.codeRoom)
+const roomData = ref({})
+
+const unsub = onSnapshot(doc(db, "rooms", codeRoom.value), (doc) => {
+  // data is updated in real time
+  roomData.value = doc.data()
+});
+// 
+
+const roomDocRef = await doc(db, 'rooms', codeRoom.value);
+const roomDocSnap = await getDoc(roomDocRef);
+
+// get user data saved in local storage
+const user = ref(JSON.parse(localStorage.getItem('user')))
+
+const isTheOwner = user.value.id == roomDocSnap.data().owner
 
 const clear = () => {
   console.log('clear')
@@ -30,9 +58,6 @@ const closeQuestionDialog = () => {
   showQuestionModal.value = false
 }
 
-// get user data saved in local storage
-const user = ref(JSON.parse(localStorage.getItem('user')))
-
 </script>
 
 <template>
@@ -43,8 +68,10 @@ const user = ref(JSON.parse(localStorage.getItem('user')))
         <div class="user__name">Usuario: {{ user.name }}</div>
         <div class="user__room">Sala: {{ user.roomId }}</div>
       </div>
-      <button @click="openAskDialog" class="">Preguntar</button>
-      <button @click="clear" class="outline small">Limpiar</button>
+      <div v-if="isTheOwner">
+        <button @click="openAskDialog" class="">Preguntar</button>
+        <button @click="clear" class="outline small">Limpiar</button>
+      </div>
     </section>
     <svg class="people" width="80%" viewBox="0 0 724 375" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle id="person0" cx="362" cy="25" r="24.5" fill="transparent" stroke="#CCCCCC" />

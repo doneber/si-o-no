@@ -7,6 +7,8 @@ import Home from './views/Home.vue'
     <h1>Voting System</h1>
   </header>
   <main class="container">
-    <router-view />
+    <suspense>
+      <router-view />
+    </suspense>
   </main>
 </template>
