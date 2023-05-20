@@ -64,6 +64,12 @@ const createRoom = async () => {
 
 const joinRoom = () => {
   console.log('joinRoom')
+  // save data of ownerRef in localstorage
+  localStorage.setItem('user', JSON.stringify(
+    {
+      name: username.value,
+    }
+  ))
   router.push('/join')
 }
 
