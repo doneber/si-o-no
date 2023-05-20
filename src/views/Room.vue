@@ -30,11 +30,19 @@ const closeQuestionDialog = () => {
   showQuestionModal.value = false
 }
 
+// get user data saved in local storage
+const user = ref(JSON.parse(localStorage.getItem('user')))
+
 </script>
 
 <template>
   <div class="people-container">
     <section class="grid">
+      <!-- show user from local storage -->
+      <div class="user">
+        <div class="user__name">Usuario: {{ user.name }}</div>
+        <div class="user__room">Sala: {{ user.roomId }}</div>
+      </div>
       <button @click="openAskDialog" class="">Preguntar</button>
       <button @click="clear" class="outline small">Limpiar</button>
     </section>

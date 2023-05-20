@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, setDoc } from "firebase/firestore";
+import { getFirestore, updateDoc } from "firebase/firestore";
 import { collection, doc, addDoc } from "firebase/firestore";
 import config from './../../config.js';
 
@@ -24,9 +24,42 @@ const goToRoom = () => {
   }
 }
 
-const createRoom = () => {
-  console.log('createRoom')
-  router.push('/room')
+const createRoom = async () => {
+  try {
+    const roomRef = await addDoc(collection(db, 'rooms'), {
+      asking: false,
+      owner: '',
+      votes: [],
+    });
+    const roomDocRef = doc(db, 'rooms', roomRef.id);
+    const usersRef = collection(roomDocRef, 'users');
+    const userRef = await addDoc(usersRef, {
+      // User data
+      name: username.value,
+    });
+    console.log('User created with ID: ', userRef.id);
+
+    // update roomRef with ownerRef.id 
+    await updateDoc(doc(db, "rooms", roomRef.id), {
+      owner: userRef.id,
+      asking: false,
+      votes: [],
+    })
+
+    // save data of ownerRef in localstorage
+    localStorage.setItem('user', JSON.stringify(
+      {
+        id: userRef.id,
+        name: username.value,
+        roomId: roomRef.id,
+      }
+    ))
+
+    router.push(`/room/${roomRef.id}`)
+    console.log('Room created with ID: ', roomRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
 }
 
 const joinRoom = () => {

@@ -11,7 +11,7 @@ export default createRouter({
       component: Home,
     },
     {
-      path: '/room',
+      path: '/room/:codeRoom',
       component: Room,
     },
     {
