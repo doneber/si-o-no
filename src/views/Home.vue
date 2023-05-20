@@ -2,6 +2,16 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
+import { initializeApp } from "firebase/app";
+import { getFirestore, setDoc } from "firebase/firestore";
+import { collection, doc, addDoc } from "firebase/firestore";
+import config from './../../config.js';
+
+const firebaseConfig = config.firebaseConfig
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const router = useRouter()
 const username = ref('')
 const action = ref('')
