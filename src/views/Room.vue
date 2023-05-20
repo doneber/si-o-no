@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, onSnapshot, getDoc, } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, getDoc, updateDoc } from "firebase/firestore";
 import config from './../../config.js';
 
 const answer = ref(false)
@@ -22,6 +22,7 @@ const roomData = ref({})
 const unsub = onSnapshot(doc(db, "rooms", codeRoom.value), (doc) => {
   // data is updated in real time
   roomData.value = doc.data()
+  showQuestionModal.value = doc.data().asking
 });
 // 
 
@@ -33,12 +34,17 @@ const user = ref(JSON.parse(localStorage.getItem('user')))
 
 const isTheOwner = user.value.id == roomDocSnap.data().owner
 
-const clear = () => {
-  console.log('clear')
+const finishAsking = async () => {
+  console.log('finishAsking')
+  await updateDoc(doc(db, "rooms", codeRoom.value), {
+    asking: false,
+  })
 }
 
-const ask = () => {
-  showQuestionModal.value = true
+const ask = async () => {
+  await updateDoc(doc(db, "rooms", codeRoom.value), {
+    asking: true,
+  })
   closeAskDialog()
 }
 
@@ -69,8 +75,10 @@ const closeQuestionDialog = () => {
         <div class="user__room">Sala: {{ user.roomId }}</div>
       </div>
       <div v-if="isTheOwner">
-        <button @click="openAskDialog" class="">Preguntar</button>
-        <button @click="clear" class="outline small">Limpiar</button>
+        <button @click="openAskDialog" :disabled="roomData.asking" class="">
+          {{ roomData.asking ? 'Preguntando...' : 'Preguntar' }}
+        </button>
+        <button @click="finishAsking" :disabled="!roomData.asking" class="outline small">Finalizar</button>
       </div>
     </section>
     <svg class="people" width="80%" viewBox="0 0 724 375" fill="none" xmlns="http://www.w3.org/2000/svg">
