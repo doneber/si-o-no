@@ -6,6 +6,10 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, updateDoc } from "firebase/firestore";
 import { collection, doc, addDoc } from "firebase/firestore";
 import config from './../../config.js';
+import { useUserStore } from '../stores/userStore'
+
+const userStore = useUserStore()
+const { updateName, updateUserId, updateRoomId } = userStore
 
 const firebaseConfig = config.firebaseConfig
 
@@ -46,14 +50,9 @@ const createRoom = async () => {
       votes: [],
     })
 
-    // save data of ownerRef in localstorage
-    localStorage.setItem('user', JSON.stringify(
-      {
-        id: userRef.id,
-        name: username.value,
-        roomId: roomRef.id,
-      }
-    ))
+    updateUserId(userRef.id)
+    updateName(username.value)
+    updateRoomId(roomRef.id)
 
     router.push(`/room/${roomRef.id}`)
     console.log('Room created with ID: ', roomRef.id);
@@ -64,12 +63,7 @@ const createRoom = async () => {
 
 const joinRoom = () => {
   console.log('joinRoom')
-  // save data of ownerRef in localstorage
-  localStorage.setItem('user', JSON.stringify(
-    {
-      name: username.value,
-    }
-  ))
+  updateName(username.value)
   router.push('/join')
 }
 

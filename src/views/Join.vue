@@ -5,6 +5,11 @@ import { useRouter, useRoute } from 'vue-router'
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, addDoc } from "firebase/firestore";
 import config from './../../config.js';
+import { useUserStore } from '../stores/userStore'
+
+const userStore = useUserStore()
+const { name } = userStore
+const { updateUserId, updateRoomId } = userStore
 
 const router = useRouter()
 const codeRoom = ref('')
@@ -15,26 +20,17 @@ const db = getFirestore(app);
 
 const joinRoom = async () => {
   console.log('joining to the room')
-  
-  // get user data saved in local storage
-  const user = ref(JSON.parse(localStorage.getItem('user')))
 
   const roomDocRef = await doc(db, 'rooms', codeRoom.value);
   const usersRef = collection(roomDocRef, 'users');
   const userRef = await addDoc(usersRef, {
-    name: user.value.name,
+    name: name,
   });
-  // save data of ownerRef in localstorage
-  localStorage.setItem('user', JSON.stringify(
-    {
-      id: userRef.id,
-      name: user.value.name,
-      roomId: codeRoom.value,
-    }
-  ))
+
+  updateUserId(userRef.id)
+  updateRoomId(codeRoom.value)
 
   router.push(`/room/${codeRoom.value}`)
-
 }
 
 </script>

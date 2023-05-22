@@ -4,6 +4,10 @@ import { useRoute } from 'vue-router'
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, onSnapshot, getDoc, updateDoc } from "firebase/firestore";
 import config from './../../config.js';
+import { useUserStore } from '../stores/userStore'
+
+const userStore = useUserStore()
+const { name, userId, roomId } = userStore
 
 const answer = ref(false)
 const showAskModal = ref(false)
@@ -29,10 +33,7 @@ const unsub = onSnapshot(doc(db, "rooms", codeRoom.value), (doc) => {
 const roomDocRef = await doc(db, 'rooms', codeRoom.value);
 const roomDocSnap = await getDoc(roomDocRef);
 
-// get user data saved in local storage
-const user = ref(JSON.parse(localStorage.getItem('user')))
-
-const isTheOwner = user.value.id == roomDocSnap.data().owner
+const isTheOwner = userId == roomDocSnap.data().owner
 
 const finishAsking = async () => {
   console.log('finishAsking')
@@ -71,8 +72,8 @@ const closeQuestionDialog = () => {
     <section class="grid">
       <!-- show user from local storage -->
       <div class="user">
-        <div class="user__name">Usuario: {{ user.name }}</div>
-        <div class="user__room">Sala: {{ user.roomId }}</div>
+        <div class="user__name">Usuario: {{ name }}</div>
+        <div class="user__room">Sala: {{ roomId }}</div>
       </div>
       <div v-if="isTheOwner">
         <button @click="openAskDialog" :disabled="roomData.asking" class="">
