@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, onSnapshot, getDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, getDocs, collection, onSnapshot, getDoc, updateDoc } from "firebase/firestore";
 import config from './../../config.js';
 import { useUserStore } from '../stores/userStore'
 
@@ -28,10 +28,44 @@ const unsub = onSnapshot(doc(db, "rooms", codeRoom.value), (doc) => {
   roomData.value = doc.data()
   showQuestionModal.value = doc.data().asking
 });
-// 
+
+// watch in realtime room asking 
+watch(roomData, async (newVal) => {
+  if (!newVal.asking) {
+    const querySnapshot = await getDocs(collection(db, `rooms/${roomId}/users`))
+    await querySnapshot.forEach((document) => {
+      updateDoc(doc(db, `rooms/${roomId}/users/${document.id}`), {
+        answer: null
+      })
+    })
+  }
+})
+
 
 const roomDocRef = await doc(db, 'rooms', codeRoom.value);
 const roomDocSnap = await getDoc(roomDocRef);
+
+// watch in realtime users from room
+onSnapshot(collection(roomDocRef, 'users'), (querySnapshot) => {
+  let i = 0
+  querySnapshot.forEach((doc) => {
+    if (roomData.value.asking) {
+      // color the svg circles
+      document.querySelector(`#person${i}`).style.stroke = '#1095c1'
+      if (doc.data().answer === true) {
+        document.querySelector(`#person${i}`).style.stroke = 'transparent'
+        document.querySelector(`#person${i}`).style.fill = '#0eaa48'
+      } else if (doc.data().answer === false) {
+        document.querySelector(`#person${i}`).style.stroke = 'transparent'
+        document.querySelector(`#person${i}`).style.fill = '#e63a3a'
+      }
+    } else {
+      document.querySelector(`#person${i}`).style.fill = 'transparent'
+      document.querySelector(`#person${i}`).style.stroke = '#1095c1'
+    }
+    i++
+  });
+});
 
 const isTheOwner = userId == roomDocSnap.data().owner
 
@@ -49,9 +83,11 @@ const ask = async () => {
   closeAskDialog()
 }
 
-const sendAnswer = (value) => {
+const sendAnswer = async (value) => {
+  await updateDoc(doc(db, "rooms", roomId, "users", userId), {
+    answer: value,
+  })
   answer.value = value
-  console.log(answer.value)
   closeQuestionDialog()
 }
 
