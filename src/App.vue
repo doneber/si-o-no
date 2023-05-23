@@ -1,62 +1,63 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from './stores/userStore'
 import { storeToRefs } from 'pinia'
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, collection, doc, getDoc, deleteDoc } from "firebase/firestore";
 import config from '../config.js';
-
 const router = useRouter();
-const isInRoom = ref(false)
 const userStore = useUserStore()
-const { name, roomId } = storeToRefs(userStore)
+const { name, roomId, userId } = storeToRefs(userStore)
 
-const goOut = () => {
+const firebaseConfig = config.firebaseConfig
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const goOut = async () => {
   const userStore = useUserStore()
   const { updateName, updateUserId, updateRoomId } = userStore
+  await deleteDoc(doc(db, "cities", "DC"));
+  const roomDocRef = await doc(db, 'rooms', roomId.value)
+  const usersRef = collection(roomDocRef, 'users');
+  // delete user from users collection
+  await deleteDoc(doc(usersRef, userId.value))
   updateUserId('')
   updateName('')
   updateRoomId('')
   router.replace('/')
 }
 
-onMounted(async () => {
-  const firebaseConfig = config.firebaseConfig
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const isValidRoomId = async (idRoom) => {
+  if (idRoom) {
+    const roomDocRef = await doc(db, 'rooms', idRoom)
+    const roomDocSnap = await getDoc(roomDocRef)
+    return roomDocSnap.exists() ? true : false
+  }
+  return false
+}
 
+onMounted(async () => {
   const { currentRoute } = await router;
   const { path } = await currentRoute.value;
-  const isValidRoomId = async (idRoom) => {
-    if (idRoom) {
-      const roomDocRef = await doc(db, 'rooms', idRoom)
-      const roomDocSnap = await getDoc(roomDocRef)
-      isInRoom.value = roomDocSnap.exists() ? true : false
-      return roomDocSnap.exists() ? true : false
-    }
-    return false
-  }
-
   if (path === '/') {
-    if (await isValidRoomId(roomId)) {
-      router.replace(`/room/${roomId}`);
+    if (await isValidRoomId(roomId.value)) {
+      router.replace(`/room/${roomId.value}`);
     } else {
       router.replace('/');
     }
   } else if (path === '/join') {
-    if (await isValidRoomId(roomId)) {
-      router.replace(`/room/${roomId}`);
+    if (await isValidRoomId(roomId.value)) {
+      router.replace(`/room/${roomId.value}`);
     } else {
       router.replace('/');
     }
   } else if (path.startsWith('/room/')) {
-    if (!name || await !isValidRoomId(roomId)) {
+    if (!name || await !isValidRoomId(roomId.value)) {
       router.replace('/');
     }
   }
 })
-console.log({roomId});
 </script>
 
 <template>
